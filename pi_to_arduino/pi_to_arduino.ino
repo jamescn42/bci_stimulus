@@ -1,34 +1,36 @@
 //Author: James Chen
 //University of Calgary
 
-int LED_array [3][4] = {
+int LED_array [2][4] = {
   {2, 3, 4, 5}
   , {1, 1, 1, 1}
-  , {0, 0, 0, 0}
 };
 
 long last_switch[4] = {0, 0, 0, 0};
-int begin_leds = 0;
+boolean begin_leds = false;
 
 void setup() {
   for (int i = 0; i < 4; i++) {
     pinMode(LED_array[0][i], OUTPUT);
+    digitalWrite(LED_array[0][i], LOW);
   };
   Serial.begin(9600);
 }
 
 void loop() {
   set_frequency();
-  if (begin_leds)
+  if (begin_leds){
     run_leds();
-
-  Serial.print(LED_array[1][0]);
-  Serial.print(",");
-  Serial.print(LED_array[1][1]);
-  Serial.print(",");
-  Serial.print(LED_array[1][2]);
-  Serial.print(",");
-  Serial.println(LED_array[1][3]);
+  }
+  
+  //Serial.print("The Frequencies of the LED's are:");
+  //Serial.print(LED_array[1][0]);
+  //Serial.print(",");
+  //Serial.print(LED_array[1][1]);
+  //Serial.print(",");
+  //Serial.print(LED_array[1][2]);
+  //Serial.print(",");
+  //Serial.println(LED_array[1][3]);
 }
 
 void set_frequency() {
@@ -38,6 +40,7 @@ void set_frequency() {
   //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)  
   
   if (Serial.available() > 0) {
+    Serial.println("************");
     for (int i = 0; i < 4; i++) {
       LED_array[1][i] = 0;
     }
@@ -67,8 +70,8 @@ void set_frequency() {
     for (int i = 0; i < 4; i++) {
       last_switch[i] = millis();
     }
+    begin_leds = true;
   }
-  begin_leds = 1;
 }
 
 void run_leds() {
@@ -76,10 +79,13 @@ void run_leds() {
   //          and LED pins properly initiated.
   //Promises: Occilates LED's at the correct frequency in LED_array
   for (int i = 0; i < 4; i++) {
-    if (millis() - last_switch[i] > 1000 / LED_array[2][i]) {
+    if (millis() - last_switch[i] >= 500.0 / LED_array[1][i]) {
+      //Serial.print("actal delay:");
+      Serial.println(millis()-last_switch[i]);
+      //Serial.print("ideal delay:");
+      Serial.println(500.0 / LED_array[1][i]);
       digitalWrite(LED_array[0][i], !digitalRead(LED_array[0][i]));
       last_switch[i] = millis();
     }
   }
 }
-
