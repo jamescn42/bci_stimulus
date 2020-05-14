@@ -1,5 +1,9 @@
 //Author: James Chen
 //University of Calgary
+#define LED1 2
+#define LED2 3
+#define LED3 4
+#define LED4 5
 
 int LED_array [2][4] = {
   {2, 3, 4, 5}
@@ -10,12 +14,13 @@ long last_switch[4] = {0, 0, 0, 0};
 boolean begin_leds = false;
 
 void setup() {
-  for (int i = 0; i < 4; i++) {
-    pinMode(LED_array[0][i], OUTPUT);
-    digitalWrite(LED_array[0][i], LOW);
-  };
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+
   Serial.begin(9600);
-}
+}p
 
 void loop() {
   set_frequency();
@@ -40,7 +45,6 @@ void set_frequency() {
   //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)  
   
   if (Serial.available() > 0) {
-    Serial.println("************");
     for (int i = 0; i < 4; i++) {
       LED_array[1][i] = 0;
     }
@@ -80,10 +84,6 @@ void run_leds() {
   //Promises: Occilates LED's at the correct frequency in LED_array
   for (int i = 0; i < 4; i++) {
     if (millis() - last_switch[i] >= 500.0 / LED_array[1][i]) {
-      //Serial.print("actal delay:");
-      Serial.println(millis()-last_switch[i]);
-      //Serial.print("ideal delay:");
-      Serial.println(500.0 / LED_array[1][i]);
       digitalWrite(LED_array[0][i], !digitalRead(LED_array[0][i]));
       last_switch[i] = millis();
     }
