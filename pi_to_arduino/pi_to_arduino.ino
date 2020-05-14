@@ -1,41 +1,56 @@
 //Author: James Chen
 //University of Calgary
-#define LED1 2
-#define LED2 3
-#define LED3 4
-#define LED4 5
 
+//Decomment to activate debugging mode. Will run 299 trials of instantaneous 
+//frequency for LEDs. Eachy trail consitsts of LED switching from on to off, vice versa
+//NOTE if LED's set at diffrent frequencies, will give diffrent frequencies in "random order"
+
+//#define DEBUG
+
+//First row gives Pin number, second row gives frequency (default 1)
 int LED_array [2][4] = {
-  {2, 3, 4, 5}
-  , {1, 1, 1, 1}
+  {
+    2, 3, 4, 5            }
+  , {
+    1, 1, 1, 1            }
 };
 
-long last_switch[4] = {0, 0, 0, 0};
+double last_switch[4] = {
+  0, 0, 0, 0};
 boolean begin_leds = false;
 
 void setup() {
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
-  pinMode(LED3, OUTPUT);
-  pinMode(LED4, OUTPUT);
-
+  //initalize pins to output and begin serial data stream
+  for(int i=0; i<4; i++){
+    pinMode(LED_array[0][i], OUTPUT);
+  }
   Serial.begin(9600);
-}p
+  
+}
+
+//degugging code
+#if defined(DEBUG)
+  static double results [300];
+  static int results_index = 0;
+#endif
 
 void loop() {
   set_frequency();
   if (begin_leds){
     run_leds();
+
+//debugging code
+#if defined(DEBUG)
+    if(results_index > 299){
+      Serial.println("the results are below:");
+      for(int i=0; i<299; i++){
+        Serial.println(500/results[i]);
+      }
+      delay(100000);
+
+    }
+#endif
   }
-  
-  //Serial.print("The Frequencies of the LED's are:");
-  //Serial.print(LED_array[1][0]);
-  //Serial.print(",");
-  //Serial.print(LED_array[1][1]);
-  //Serial.print(",");
-  //Serial.print(LED_array[1][2]);
-  //Serial.print(",");
-  //Serial.println(LED_array[1][3]);
 }
 
 void set_frequency() {
@@ -43,17 +58,19 @@ void set_frequency() {
   //          and LED pins properly initiated. In addition, a properly statically declared
   //          int begin_leds
   //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)  
-  
+
   if (Serial.available() > 0) {
     for (int i = 0; i < 4; i++) {
       LED_array[1][i] = 0;
     }
 
+   
     String data = Serial.readStringUntil('\n');
     int k = 0;
     int j = 0;
     char freq[3];
 
+    //need to extract each frequency String
     for (int i = 0; i < data.length(); i++) {
       if (data[i] != ',') {
         freq[ k] = data[i];
@@ -61,18 +78,16 @@ void set_frequency() {
       }
       else {
         k = 0;
-        //convert freq str to int
+        //to do math, we must convert Frequency stirng to an int
         int final_freq = (int(freq[0]) - 48) * 100 + (int(freq[1]) - 48) * 10 + (int(freq[2]) - 48);
         LED_array[1][j] = final_freq;
         j++;
-        freq[0] = '\0';
-        freq[1] = '\0';
-        freq[2] = '\0';
       }
     }
-
+    
+    //begins the LED switching updates
     for (int i = 0; i < 4; i++) {
-      last_switch[i] = millis();
+      last_switch[i] = micros()/1000.0;
     }
     begin_leds = true;
   }
@@ -82,10 +97,19 @@ void run_leds() {
   //Requires: Properly formatted last_switch and LED_array[2][i] arrays with valid values
   //          and LED pins properly initiated.
   //Promises: Occilates LED's at the correct frequency in LED_array
+  
   for (int i = 0; i < 4; i++) {
-    if (millis() - last_switch[i] >= 500.0 / LED_array[1][i]) {
+    if (micros()/1000.0 - last_switch[i] >= 500.0 / LED_array[1][i]) {
+
+      //debugging code
+#if defined(DEBUG)
+      results[results_index] = micros()/1000.0 - last_switch[i];
+      results_index++;
+#endif
+
+      //toggle LED on/off and update the last switched time
       digitalWrite(LED_array[0][i], !digitalRead(LED_array[0][i]));
-      last_switch[i] = millis();
+      last_switch[i] = micros()/1000.0;
     }
   }
 }
