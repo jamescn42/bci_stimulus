@@ -13,8 +13,6 @@ class FrequencyConfig(ttk.Frame):
         super().__init__(parent, padding=5)
         self.grid(sticky=tk.N+tk.S+tk.W+tk.E)
         self.makewidgets()
-        self.freqs = [1, 1, 1, 1]
-        self.boxes = []
 
     def makewidgets(self):
         # title label
