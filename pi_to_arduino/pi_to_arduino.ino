@@ -7,25 +7,17 @@
 
 //#define DEBUG
 
-//First row gives Pin number, second row gives frequency (default 1)
-int LED_array [2][4] = {
-  {
-    2, 3, 4, 5            }
-  , {
-    1, 1, 1, 1            }
-};
 
-double last_switch[4] = {
-  0, 0, 0, 0};
+// set up Arrays
+int LED_array [3][16];
+double last_switch[16];
+
+boolean delay_phase = true;
 boolean begin_leds = false;
+int number_LED = 0;
 
 void setup() {
-  //initalize pins to output and begin serial data stream
-  for(int i=0; i<4; i++){
-    pinMode(LED_array[0][i], OUTPUT);
-  }
   Serial.begin(9600);
-  
 }
 
 //degugging code
@@ -60,34 +52,56 @@ void set_frequency() {
   //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)  
 
   if (Serial.available() > 0) {
-    for (int i = 0; i < 4; i++) {
-      LED_array[1][i] = 0;
+    //read data from serial
+    String data = Serial.readStringUntil('\n');
+
+    //get number of active pins
+    for (int i = 0; i < data.length(); i++){
+      if (data[i] == ';')
+        number_LED++;
     }
 
-   
-    String data = Serial.readStringUntil('\n');
-    int k = 0;
-    int j = 0;
-    char freq[3];
+    int pin_num = 0;    //seperates pin#
+    int data_num = 0;   //seperates data in each pin#
 
-    //need to extract each frequency String
+    //store sting of data, convert after
+    char pin_char[2];         //store pin# char
+    char freq_char[2];       //store freq chars
+    char phase_char[3];       //store phase char
+
+    //extract data out of serial
+    int j = 0;
     for (int i = 0; i < data.length(); i++) {
-      if (data[i] != ',') {
-        freq[ k] = data[i];
-        k++;
-      }
-      else {
-        k = 0;
-        //to do math, we must convert Frequency stirng to an int
-        int final_freq = (int(freq[0]) - 48) * 100 + (int(freq[1]) - 48) * 10 + (int(freq[2]) - 48);
-        LED_array[1][j] = final_freq;
-        j++;
+      if(data[i]==','){
+        data_num++;
+      }else if(data[i]==';'){
+        //convert string into int
+        LED_array[pin_num][0]= (int(pin_char[0]) - 48) * 10 + (int(pin_char[1]) - 48);
+        LED_array[pin_num][1]= (int(freq_char[0]) - 48) * 10 + (int(freq_char[1]) - 48);
+        LED_array[pin_num][2]= (int(phase_char[0]) - 48) * 100 + (int(phase_char[1]) - 48) * 10 + (int(phase_char[2]) - 48);
+
+        data_num = 0;
+        pin_num++;
+
+      }else if(data_num==0){
+        pin_char[j] = data[i];
+        if(j==1){j=0;}
+        else{j++;}
+      }else if(data_num==1){
+        freq_char[j] = data[i];
+        if(j==1){j=0;}
+        else{j++;}
+      }else if(data_num==2){
+        phase_char[j] = data[i];
+        if(j==2){j=0;}
+        else{j++;}
       }
     }
     
-    //begins the LED switching updates
-    for (int i = 0; i < 4; i++) {
+    //begins the LED switching updates and initalizes all pins to output
+    for (int i = 0; i < number_LED; i++) {
       last_switch[i] = micros()/1000.0;
+      pinMode(LED_array[0][i], OUTPUT);
     }
     begin_leds = true;
   }
@@ -97,8 +111,11 @@ void run_leds() {
   //Requires: Properly formatted last_switch and LED_array[2][i] arrays with valid values
   //          and LED pins properly initiated.
   //Promises: Occilates LED's at the correct frequency in LED_array
-  
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < number_LED; i++) {
+    if (delay_phase){
+      last_switch[i] += LED_array[2][i]/360*1000/LED_array[1][i];
+      delay_phase = false;
+    }
     if (micros()/1000.0 - last_switch[i] >= 500.0 / LED_array[1][i]) {
 
       //debugging code

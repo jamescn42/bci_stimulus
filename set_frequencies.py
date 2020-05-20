@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import simpledialog
+from tkinter import Checkbutton
+from tkinter import Spinbox
 
 
 class FrequencyConfig(ttk.Frame):
@@ -17,53 +19,82 @@ class FrequencyConfig(ttk.Frame):
     def makewidgets(self):
         # title label
         ttk.Label(self, text='Set Frequencies for SSVEP',
-                  font=("Verdana", 16)).grid(column=0, row=0, columnspan=2)
+                  font=("Verdana", 16)).grid(column=0, row=0, columnspan=4)
 
-        self.freqs = [1, 1, 1, 1]
-        self.boxes = []
-        # frequency 1
-        ttk.Label(self, text='Frequency for LED 1 (Hz):').grid(
-            column=0, row=1)
-        self.boxes.append(tk.Text(self, width=15, height=1))
-        self.boxes[0].grid(column=1, row=1, sticky='W')
+        # tk elements
+        self.ckbox = []
+        self.freqbox = []
+        self.phases = []
 
-        # frequency 2
-        ttk.Label(self, text='Frequency for LED 2 (Hz):').grid(
-            column=0, row=2)
-        self.boxes.append(tk.Text(self, width=15, height=1))
-        self.boxes[1].grid(column=1, row=2, sticky='W')
+        # Table header
+        ttk.Label(self, text='  Pin  ').grid(column=0, row=1)
+        ttk.Label(self, text='ON/OFF').grid(column=1, row=1)
+        ttk.Label(self, text='  Frequency (Hz)  ').grid(column=2, row=1)
+        ttk.Label(self, text='  Phase Angle (°)').grid(column=3, row=1)
 
-        # frequency 3
-        ttk.Label(self, text='Frequency for LED 3 (Hz):').grid(
-            column=0, row=3)
-        self.boxes.append(tk.Text(self, width=15, height=1))
-        self.boxes[2].grid(column=1, row=3, sticky='W')
+        for i in range(16):
 
-        # frequency 4
-        ttk.Label(self, text='Frequency for LED 4 (Hz):').grid(
-            column=0, row=4)
-        self.boxes.append(tk.Text(self, width=15, height=1))
-        self.boxes[3].grid(column=1, row=4, sticky='W')
+            # pin numbers
+            ttk.Label(self, text=str(i*2+23)).grid(
+                column=0, row=i+2)
+
+            # check boxes
+            self.ckbox.append(tk.IntVar())
+            Checkbutton(self, variable=self.ckbox[i]).grid(column=1, row=i+2)
+
+            # frequency boxes
+            self.freqbox.append(tk.Text(self, width=10, height=1))
+            self.freqbox[i].grid(column=2, row=i+2)
+
+            # phase angles
+            self.phases.append(Spinbox(self, values=(
+                '0', '90', '180', '270'), width='5'))
+            self.phases[i].grid(column=3, row=i+2)
 
         # set frequencies button
-        ttk.Button(self, text='Set Frequencies', command=self.set_freq).grid(
-            column=0, row=5, columnspan=2)
+        ttk.Button(self, text='Set Frequencies', command=self.set_freq, width=15).grid(
+            column=0, row=19, columnspan=4)
 
     def set_freq(self):
-        for i in range(4):
-            try:
-                if(0 < int(self.boxes[i].get('1.0', tk.END+'-1c')) <= 100):
-                    self.freqs[i] = int(self.boxes[i].get('1.0', tk.END+'-1c'))
-                else:
+
+        # extracted data
+        self.freqs = []
+        self.pins = []
+        self.phase_vals = []
+
+        # extract data
+        for i in range(16):
+            if self.ckbox[i].get() == 1:
+                # get freqs
+                try:
+                    if(0 < int(self.freqbox[i].get('1.0', tk.END+'-1c')) <= 100):
+                        self.freqs.append(
+                            int(self.freqbox[i].get('1.0', tk.END+'-1c')))
+                    else:
+                        messagebox.showinfo(
+                            "Error", "That frequency is out of bounds! Please choose a diffrent frequency (0<freq<=100)")
+                        return
+                except:
                     messagebox.showinfo(
                         "Error", "That frequency is out of bounds! Please choose a diffrent frequency (0<freq<=100)")
-            except:
-                pass
+                    return
+
+                # get phases
+                self.phase_vals.append(self.phases[i].get())
+
+                # get pin number
+                self.pins.append(i*2+23)
+
+        message = ''
+        for i in range(len(self.pins)):
+            message = message + \
+                f'{int(self.pins[i]):02}'+','+f'{self.freqs[i]:02}' + \
+                ','+f'{int(self.phase_vals[i]):03}'+';'
 
         ser.flush()
-        message = f'{self.freqs[0]:03}'+','+f'{self.freqs[1]:03}' + \
-            ','+f'{self.freqs[2]:03}'+','+f'{self.freqs[3]:03}'+','
         ser.write(message.encode('utf-8'))
+
+        # print(message)
 
 
 if __name__ == '__main__':
