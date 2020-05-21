@@ -12,6 +12,7 @@
 int LED_array [3][16];
 double last_switch[16];
 
+// global variables 
 boolean delay_phase = true;
 boolean begin_leds = false;
 int number_LED = 0;
@@ -22,8 +23,8 @@ void setup() {
 
 //degugging code
 #if defined(DEBUG)
-  static double results [300];
-  static int results_index = 0;
+static double results [300];
+static int results_index = 0;
 #endif
 
 void loop() {
@@ -31,13 +32,17 @@ void loop() {
   if (begin_leds){
     run_leds();
 
-//debugging code
+    //debugging code
 #if defined(DEBUG)
     if(results_index > 299){
-      Serial.println("the results are below:");
-      for(int i=0; i<299; i++){
+      double sum = 0;
+      Serial.println("Instantaneous Frequency:");
+      for(int i=0; i<300; i++){
         Serial.println(500/results[i]);
+        sum+= 500/results[i];
       }
+      Serial.println("Average frequency over 300 samples:");
+      Serial.println(sum/300);
       delay(100000);
 
     }
@@ -49,12 +54,13 @@ void set_frequency() {
   //Requires: Properly formatted last_switch and LED_array[2][i] arrays with valid values
   //          and LED pins properly initiated. In addition, a properly statically declared
   //          int begin_leds
-  //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)  
-
+  //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)    
   if (Serial.available() > 0) {
+    delay_phase = true;
+
     //read data from serial
     String data = Serial.readStringUntil('\n');
-
+    number_LED = 0;
     //get number of active pins
     for (int i = 0; i < data.length(); i++){
       if (data[i] == ';')
@@ -74,34 +80,51 @@ void set_frequency() {
     for (int i = 0; i < data.length(); i++) {
       if(data[i]==','){
         data_num++;
-      }else if(data[i]==';'){
+      }
+      else if(data[i]==';'){
         //convert string into int
-        LED_array[pin_num][0]= (int(pin_char[0]) - 48) * 10 + (int(pin_char[1]) - 48);
-        LED_array[pin_num][1]= (int(freq_char[0]) - 48) * 10 + (int(freq_char[1]) - 48);
-        LED_array[pin_num][2]= (int(phase_char[0]) - 48) * 100 + (int(phase_char[1]) - 48) * 10 + (int(phase_char[2]) - 48);
+        LED_array[0][pin_num]= (int(pin_char[0]) - 48) * 10 + (int(pin_char[1]) - 48);
+        LED_array[1][pin_num]= (int(freq_char[0]) - 48) * 10 + (int(freq_char[1]) - 48);
+        LED_array[2][pin_num]= (int(phase_char[0]) - 48) * 100 + (int(phase_char[1]) - 48) * 10 + (int(phase_char[2]) - 48);
 
         data_num = 0;
         pin_num++;
 
-      }else if(data_num==0){
+      }
+      else if(data_num==0){
         pin_char[j] = data[i];
-        if(j==1){j=0;}
-        else{j++;}
-      }else if(data_num==1){
+        if(j==1){
+          j=0;
+        }
+        else{
+          j++;
+        }
+      }
+      else if(data_num==1){
         freq_char[j] = data[i];
-        if(j==1){j=0;}
-        else{j++;}
-      }else if(data_num==2){
+        if(j==1){
+          j=0;
+        }
+        else{
+          j++;
+        }
+      }
+      else if(data_num==2){
         phase_char[j] = data[i];
-        if(j==2){j=0;}
-        else{j++;}
+        if(j==2){
+          j=0;
+        }
+        else{
+          j++;
+        }
       }
     }
-    
+
     //begins the LED switching updates and initalizes all pins to output
     for (int i = 0; i < number_LED; i++) {
       last_switch[i] = micros()/1000.0;
       pinMode(LED_array[0][i], OUTPUT);
+      digitalWrite(LED_array[0][i], HIGH);
     }
     begin_leds = true;
   }
@@ -113,8 +136,7 @@ void run_leds() {
   //Promises: Occilates LED's at the correct frequency in LED_array
   for (int i = 0; i < number_LED; i++) {
     if (delay_phase){
-      last_switch[i] += LED_array[2][i]/360*1000/LED_array[1][i];
-      delay_phase = false;
+      last_switch[i] += LED_array[2][i]/360.0*1000/LED_array[1][i];
     }
     if (micros()/1000.0 - last_switch[i] >= 500.0 / LED_array[1][i]) {
 
@@ -129,4 +151,6 @@ void run_leds() {
       last_switch[i] = micros()/1000.0;
     }
   }
+  delay_phase = false;
 }
+

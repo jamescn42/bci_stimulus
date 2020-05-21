@@ -56,7 +56,6 @@ class FrequencyConfig(ttk.Frame):
             column=0, row=19, columnspan=4)
 
     def set_freq(self):
-
         # extracted data
         self.freqs = []
         self.pins = []
@@ -93,8 +92,6 @@ class FrequencyConfig(ttk.Frame):
 
         ser.flush()
         ser.write(message.encode('utf-8'))
-
-        # print(message)
 
 
 if __name__ == '__main__':
