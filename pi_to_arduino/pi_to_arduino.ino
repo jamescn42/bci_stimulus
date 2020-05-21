@@ -12,6 +12,7 @@
 int LED_array [3][16];
 double last_switch[16];
 
+// global variables 
 boolean delay_phase = true;
 boolean begin_leds = false;
 int number_LED = 0;
@@ -22,8 +23,8 @@ void setup() {
 
 //degugging code
 #if defined(DEBUG)
-  static double results [300];
-  static int results_index = 0;
+static double results [300];
+static int results_index = 0;
 #endif
 
 void loop() {
@@ -31,7 +32,7 @@ void loop() {
   if (begin_leds){
     run_leds();
 
-//debugging code
+    //debugging code
 #if defined(DEBUG)
     if(results_index > 299){
       double sum = 0;
@@ -56,7 +57,7 @@ void set_frequency() {
   //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)    
   if (Serial.available() > 0) {
     delay_phase = true;
-    
+
     //read data from serial
     String data = Serial.readStringUntil('\n');
     number_LED = 0;
@@ -79,7 +80,8 @@ void set_frequency() {
     for (int i = 0; i < data.length(); i++) {
       if(data[i]==','){
         data_num++;
-      }else if(data[i]==';'){
+      }
+      else if(data[i]==';'){
         //convert string into int
         LED_array[0][pin_num]= (int(pin_char[0]) - 48) * 10 + (int(pin_char[1]) - 48);
         LED_array[1][pin_num]= (int(freq_char[0]) - 48) * 10 + (int(freq_char[1]) - 48);
@@ -88,18 +90,33 @@ void set_frequency() {
         data_num = 0;
         pin_num++;
 
-      }else if(data_num==0){
+      }
+      else if(data_num==0){
         pin_char[j] = data[i];
-        if(j==1){j=0;}
-        else{j++;}
-      }else if(data_num==1){
+        if(j==1){
+          j=0;
+        }
+        else{
+          j++;
+        }
+      }
+      else if(data_num==1){
         freq_char[j] = data[i];
-        if(j==1){j=0;}
-        else{j++;}
-      }else if(data_num==2){
+        if(j==1){
+          j=0;
+        }
+        else{
+          j++;
+        }
+      }
+      else if(data_num==2){
         phase_char[j] = data[i];
-        if(j==2){j=0;}
-        else{j++;}
+        if(j==2){
+          j=0;
+        }
+        else{
+          j++;
+        }
       }
     }
 
@@ -136,3 +153,4 @@ void run_leds() {
   }
   delay_phase = false;
 }
+
