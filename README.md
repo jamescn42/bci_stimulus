@@ -13,7 +13,3 @@ Upload `pi_to_arduino.ino` to arduino MEGA and connect LED's as well as resistor
 
 # Possible Circuit Implementation:
 ![Screenshot of example GUI](SSVEP_arduino_circuit_diagram.png)
-
-Notes:
-R1 should be selected so that it drops the rest of the voltage after the 3 LED's: R1 = (9V-3*[LED_Voltage]/0.02A)
-NPN transistor should have a 5V Emitter-Base Voltage
