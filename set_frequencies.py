@@ -10,7 +10,7 @@ from tkinter import Checkbutton
 from tkinter import Spinbox
 
 
-class FrequencyConfig(ttk.Frame):
+class StimulusConfig(ttk.Frame):
     def __init__(self, parent=None):
         super().__init__(parent, padding=5)
         self.grid(sticky=tk.N+tk.S+tk.W+tk.E)
@@ -84,7 +84,7 @@ class FrequencyConfig(ttk.Frame):
                 # get pin number
                 self.pins.append(i*2+23)
 
-        message = ''
+        message = 's/'
         for i in range(len(self.pins)):
             message = message + \
                 f'{int(self.pins[i]):02}'+','+f'{self.freqs[i]:02}' + \
@@ -99,5 +99,5 @@ if __name__ == '__main__':
     ser.flush()
 
     root = tk.Tk()
-    FrequencyConfig(root)
+    StimulusConfig(root)
     root.mainloop()

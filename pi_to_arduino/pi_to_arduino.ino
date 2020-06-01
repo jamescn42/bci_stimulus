@@ -28,7 +28,24 @@ static int results_index = 0;
 #endif
 
 void loop() {
-  set_frequency();
+
+  if (Serial.available() > 0) {
+    //read data from serial
+    String data = Serial.readStringUntil('\n');
+
+    //check if stimulus input
+    if (data[0] == 's'){
+      //FORMAT: "s/001023090"----stimulus input data, pin 001, 23 hz, 90degree phase shift
+        set_stimulus(data);
+    }
+
+    //add motor code
+    if (data[0] == 'd'){
+        //FORMAT: 'd/f' -- drive input data: go forwards; 'f'-forwards, 'r'-reverse, 'l' -left, 'r'-right
+        drive_motor(data);
+    }
+  }
+
   if (begin_leds){
     run_leds();
 
@@ -44,90 +61,86 @@ void loop() {
       Serial.println("Average frequency over 300 samples:");
       Serial.println(sum/300);
       delay(100000);
-
     }
 #endif
   }
 }
 
-void set_frequency() {
-  //Requires: Properly formatted last_switch and LED_array[2][i] arrays with valid values
-  //          and LED pins properly initiated. In addition, a properly statically declared
-  //          int begin_leds
-  //Promises: Updates LED_array with new frequencies from serial data input (from Raspberry Pi)    
-  if (Serial.available() > 0) {
-    delay_phase = true;
+void set_stimulus(String data) {
+  //Requires: Properly formatted string data with frequencies to set from raspberry pi
+  //          Properly declared last_switch and LED_array[2][i] arrays 
+  //          In addition, a properly statically declared int begin_leds amd number_LED
+  //Promises: Updates LED_array with new pins, frequencies, phase angles from from Raspberry Pi 
 
-    //read data from serial
-    String data = Serial.readStringUntil('\n');
-    number_LED = 0;
-    //get number of active pins
-    for (int i = 0; i < data.length(); i++){
-      if (data[i] == ';')
-        number_LED++;
-    }
-
-    int pin_num = 0;    //seperates pin#
-    int data_num = 0;   //seperates data in each pin#
-
-    //store sting of data, convert after
-    char pin_char[2];         //store pin# char
-    char freq_char[2];       //store freq chars
-    char phase_char[3];       //store phase char
-
-    //extract data out of serial
-    int j = 0;
-    for (int i = 0; i < data.length(); i++) {
-      if(data[i]==','){
-        data_num++;
-      }
-      else if(data[i]==';'){
-        //convert string into int
-        LED_array[0][pin_num]= (int(pin_char[0]) - 48) * 10 + (int(pin_char[1]) - 48);
-        LED_array[1][pin_num]= (int(freq_char[0]) - 48) * 10 + (int(freq_char[1]) - 48);
-        LED_array[2][pin_num]= (int(phase_char[0]) - 48) * 100 + (int(phase_char[1]) - 48) * 10 + (int(phase_char[2]) - 48);
-
-        data_num = 0;
-        pin_num++;
-
-      }
-      else if(data_num==0){
-        pin_char[j] = data[i];
-        if(j==1){
-          j=0;
-        }
-        else{
-          j++;
-        }
-      }
-      else if(data_num==1){
-        freq_char[j] = data[i];
-        if(j==1){
-          j=0;
-        }
-        else{
-          j++;
-        }
-      }
-      else if(data_num==2){
-        phase_char[j] = data[i];
-        if(j==2){
-          j=0;
-        }
-        else{
-          j++;
-        }
-      }
-    }
-
-    //begins the LED switching updates and initalizes all pins to output
-    for (int i = 0; i < number_LED; i++) {
-      last_switch[i] = micros()/1000.0;
-      pinMode(LED_array[0][i], OUTPUT);
-      digitalWrite(LED_array[0][i], HIGH);
-    }
-    begin_leds = true;
+  //get number of active pins
+  number_LED = 0;
+  for (int i = 2; i < data.length(); i++){
+    if (data[i] == ';')
+      number_LED++;
   }
+  
+  delay_phase = true;
+  int pin_num = 0;    //seperates pin#
+  int data_num = 0;   //seperates data in each pin#
+
+  //store sting of data, convert after
+  char pin_char[2];         //store pin# char
+  char freq_char[2];       //store freq chars
+  char phase_char[3];       //store phase char
+
+  //extract data out of serial
+  int j = 0;
+  for (int i = 2; i < data.length(); i++) {
+    if(data[i]==','){
+      data_num++;
+    }
+    else if(data[i]==';'){
+      //convert string into int
+      LED_array[0][pin_num]= (int(pin_char[0]) - 48) * 10 + (int(pin_char[1]) - 48);
+      LED_array[1][pin_num]= (int(freq_char[0]) - 48) * 10 + (int(freq_char[1]) - 48);
+      LED_array[2][pin_num]= (int(phase_char[0]) - 48) * 100 + (int(phase_char[1]) - 48) * 10 + (int(phase_char[2]) - 48);
+
+      data_num = 0;
+      pin_num++;
+
+    }
+    else if(data_num==0){
+      pin_char[j] = data[i];
+      if(j==1){
+        j=0;
+      }
+      else{
+        j++;
+      }
+    }
+    else if(data_num==1){
+      freq_char[j] = data[i];
+      if(j==1){
+        j=0;
+      }
+      else{
+        j++;
+      }
+    }
+    else if(data_num==2){
+      phase_char[j] = data[i];
+      if(j==2){
+        j=0;
+      }
+      else{
+        j++;
+      }
+    }
+  }
+
+  //begins the LED switching updates and initalizes all pins to output
+  for (int i = 0; i < number_LED; i++) {
+    last_switch[i] = micros()/1000.0;
+    pinMode(LED_array[0][i], OUTPUT);
+    digitalWrite(LED_array[0][i], HIGH);
+  }
+  begin_leds = true;
+
 }
 
 void run_leds() {
@@ -154,3 +167,26 @@ void run_leds() {
   delay_phase = false;
 }
 
+void drive_motor(string data){
+  //Requires: valid properly formatted data sting
+  //Promises: outputs PWM for drive direction
+
+  //TODO: code for output of direction of control.
+  //      dependent on type of motor controller/wheelchair output
+
+  char direction = data[2];
+  switch (direction){
+    case 'f':
+      //code for forward direction
+      break;
+    case 'r':
+      //code for reverse direction
+      break;
+    case 'l':
+      //code for left direction
+      break;
+    case 'r':
+      //code for right direction
+      break;
+  }
+}
