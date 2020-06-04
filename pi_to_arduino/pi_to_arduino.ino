@@ -1,9 +1,9 @@
 //Author: James Chen
 //University of Calgary
 
-//Decomment to activate debugging mode. Will run 299 trials of instantaneous 
-//frequency for LEDs. Eachy trail consitsts of LED switching from on to off, vice versa
-//NOTE if LED's set at diffrent frequencies, will give diffrent frequencies in "random order"
+//Uncomment to activate debugging mode. Will run 299 trials of instantaneous
+//frequency for LEDs. Each trail consists of LED switching from on to off, vice versa
+//NOTE if LED's set at different frequencies, will give different frequencies in "random order"
 
 //#define DEBUG
 
@@ -21,7 +21,7 @@ void setup() {
   Serial.begin(9600);
 }
 
-//degugging code
+//debugging code
 #if defined(DEBUG)
 static double results [300];
 static int results_index = 0;
@@ -80,8 +80,8 @@ void set_stimulus(String data) {
   }
   
   delay_phase = true;
-  int pin_num = 0;    //seperates pin#
-  int data_num = 0;   //seperates data in each pin#
+  int pin_num = 0;    //separates pin#
+  int data_num = 0;   //separates data in each pin#
 
   //store sting of data, convert after
   char pin_char[2];         //store pin# char
@@ -133,7 +133,7 @@ void set_stimulus(String data) {
     }
   }
 
-  //begins the LED switching updates and initalizes all pins to output
+  //begins the LED switching updates and initializes all pins to output
   for (int i = 0; i < number_LED; i++) {
     last_switch[i] = micros()/1000.0;
     pinMode(LED_array[0][i], OUTPUT);
@@ -146,7 +146,7 @@ void set_stimulus(String data) {
 void run_leds() {
   //Requires: Properly formatted last_switch and LED_array[2][i] arrays with valid values
   //          and LED pins properly initiated.
-  //Promises: Occilates LED's at the correct frequency in LED_array
+  //Promises: Oscillates LED's at the correct frequency in LED_array
   for (int i = 0; i < number_LED; i++) {
     if (delay_phase){
       last_switch[i] += LED_array[2][i]/360.0*1000/LED_array[1][i];
