@@ -29,6 +29,7 @@ class RemoteControl:
     begin_control()
         Starts pygame screen and sends corresponding information
     """
+
     def __init__(self):
         pygame.init()
         pygame.display.set_caption('Wheelchair Control')
@@ -133,6 +134,20 @@ class RemoteControl:
             # Background color
             self._screen.fill((255, 255, 255))
 
+            # Title
+            large_font = pygame.font.Font('freesansbold.ttf', 45)
+            title = large_font.render('Wheelchair Control', True, (0, 0, 0))
+            title_rect = title.get_rect()
+            title_rect.center = (250, 50)
+            self._screen.blit(title, title_rect)
+
+            # Instructions
+            body_font = pygame.font.Font('freesansbold.ttf', 12)
+            instructions = body_font.render("Use WASD or Arrows to control device manually", True, (0, 0, 0))
+            instructions_rect = instructions.get_rect()
+            instructions_rect.center = (250, 400)
+            self._screen.blit(instructions, instructions_rect)
+
             # Exit conditions
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -151,14 +166,14 @@ class RemoteControl:
             listener.start()
 
             # import button images
-            up = pygame.image.load("arrows/up.png")
-            up_pressed = pygame.image.load("arrows/up_pressed.png")
-            down = pygame.image.load("arrows/down.png")
-            down_pressed = pygame.image.load("arrows/down_pressed.png")
-            left = pygame.image.load("arrows/left.png")
-            left_pressed = pygame.image.load("arrows/left_pressed.png")
-            right = pygame.image.load("arrows/right.png")
-            right_pressed = pygame.image.load("arrows/right_pressed.png")
+            up = pygame.image.load("images/arrows/up.png")
+            up_pressed = pygame.image.load("images/arrows/up_pressed.png")
+            down = pygame.image.load("images/arrows/down.png")
+            down_pressed = pygame.image.load("images/arrows/down_pressed.png")
+            left = pygame.image.load("images/arrows/left.png")
+            left_pressed = pygame.image.load("images/arrows/left_pressed.png")
+            right = pygame.image.load("images/arrows/right.png")
+            right_pressed = pygame.image.load("images/arrows/right_pressed.png")
 
             # Draws arrows corresponding to keyboard presses
             # And sends data to arudino though bluetooth
@@ -169,7 +184,7 @@ class RemoteControl:
                 self._screen.blit(up, (187, 100))
             if self._buttons_pressed[1]:
                 self._screen.blit(down_pressed, (187, 275))
-                self.__send_data('r')
+                self.__send_data('b')
             else:
                 self._screen.blit(down, (187, 275))
             if self._buttons_pressed[2]:
@@ -193,7 +208,7 @@ class RemoteControl:
         pygame.quit()
 
     def __send_data(self, direction):
-        # TODO: write this function to send data though bluetooth
+        # TODO: write this function to send data to Arduino (serial or bluetooth)
         pass
 
 

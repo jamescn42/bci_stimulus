@@ -9,6 +9,9 @@ from tkinter import Checkbutton
 from tkinter import Spinbox
 
 
+# TODO: Manual pin selection interface
+
+
 class StimulusConfig(ttk.Frame):
     def __init__(self, parent=None):
         super().__init__(parent, padding=5)
