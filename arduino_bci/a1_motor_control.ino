@@ -2,7 +2,7 @@
 //University of Calgary
 //a1_motor_control.ino
 
-//Contains fuctions related to driving the wheelchair motors
+//Contains functions related to driving the wheelchair motors
 
 void drive_motor(String data) {
   //Requires: valid properly formatted data sting
