@@ -145,7 +145,7 @@ class RemoteControl:
             body_font = pygame.font.Font('freesansbold.ttf', 12)
             instructions = body_font.render("Use WASD or Arrows to control device manually", True, (0, 0, 0))
             instructions_rect = instructions.get_rect()
-            instructions_rect.center = (250, 400)
+            instructions_rect.center = (250, 475)
             self._screen.blit(instructions, instructions_rect)
 
             # Exit conditions
@@ -166,37 +166,67 @@ class RemoteControl:
             listener.start()
 
             # import button images
-            up = pygame.image.load("images/arrows/up.png")
-            up_pressed = pygame.image.load("images/arrows/up_pressed.png")
-            down = pygame.image.load("images/arrows/down.png")
-            down_pressed = pygame.image.load("images/arrows/down_pressed.png")
-            left = pygame.image.load("images/arrows/left.png")
-            left_pressed = pygame.image.load("images/arrows/left_pressed.png")
-            right = pygame.image.load("images/arrows/right.png")
-            right_pressed = pygame.image.load("images/arrows/right_pressed.png")
+            north_arrow_unpressed = pygame.image.load("images/arrows/n_unpressed.png")
+            north_east_arrow_unpressed = pygame.image.load("images/arrows/ne_unpressed.png")
+            north_west_arrow_unpressed = pygame.image.load("images/arrows/nw_unpressed.png")
+            south_arrow_unpressed = pygame.image.load("images/arrows/s_unpressed.png")
+            south_east_arrow_unpressed = pygame.image.load("images/arrows/se_unpressed.png")
+            south_west_arrow_unpressed = pygame.image.load("images/arrows/sw_unpressed.png")
+            west_arrow_unpressed = pygame.image.load("images/arrows/w_unpressed.png")
+            east_arrow_unpressed = pygame.image.load("images/arrows/e_unpressed.png")
+
+            north_arrow_pressed = pygame.image.load("images/arrows/n_pressed.png")
+            north_east_arrow_pressed = pygame.image.load("images/arrows/ne_pressed.png")
+            north_west_arrow_pressed = pygame.image.load("images/arrows/nw_pressed.png")
+            south_arrow_pressed = pygame.image.load("images/arrows/s_pressed.png")
+            south_east_arrow_pressed = pygame.image.load("images/arrows/se_pressed.png")
+            south_west_arrow_pressed = pygame.image.load("images/arrows/sw_pressed.png")
+            west_arrow_pressed = pygame.image.load("images/arrows/w_pressed.png")
+            east_arrow_pressed = pygame.image.load("images/arrows/e_pressed.png")
 
             # Draws arrows corresponding to keyboard presses
             # And sends data to arudino though bluetooth
-            if self._buttons_pressed[0]:
-                self._screen.blit(up_pressed, (187, 100))
-                self.__send_data('f')
+            if self._buttons_pressed == [True, False, False, False]:
+                self._screen.blit(north_arrow_pressed, (187, 75))
+                self.__send_data('nn')
             else:
-                self._screen.blit(up, (187, 100))
-            if self._buttons_pressed[1]:
-                self._screen.blit(down_pressed, (187, 275))
-                self.__send_data('b')
+                self._screen.blit(north_arrow_unpressed, (187, 75))
+            if self._buttons_pressed == [False, True, False, False]:
+                self._screen.blit(south_arrow_pressed, (187, 325))
+                self.__send_data('ss')
             else:
-                self._screen.blit(down, (187, 275))
-            if self._buttons_pressed[2]:
-                self._screen.blit(left_pressed, (100, 187))
-                self.__send_data('l')
+                self._screen.blit(south_arrow_unpressed, (187, 325))
+            if self._buttons_pressed == [False, False, True, False]:
+                self._screen.blit(west_arrow_pressed, (24, 200))
+                self.__send_data('ww')
             else:
-                self._screen.blit(left, (100, 187))
-            if self._buttons_pressed[3]:
-                self._screen.blit(right_pressed, (275, 187))
-                self.__send_data('r')
+                self._screen.blit(west_arrow_unpressed, (24, 200))
+            if self._buttons_pressed == [False, False, False, True]:
+                self._screen.blit(east_arrow_pressed, (350, 200))
+                self.__send_data('ee')
             else:
-                self._screen.blit(right, (275, 187))
+                self._screen.blit(east_arrow_unpressed, (350, 200))
+
+            if self._buttons_pressed == [False, True, False, True]:
+                self._screen.blit(south_east_arrow_pressed, (350, 325))
+                self.__send_data('se')
+            else:
+                self._screen.blit(south_east_arrow_unpressed, (350, 325))
+            if self._buttons_pressed == [False, True, True, False]:
+                self._screen.blit(south_west_arrow_pressed, (24, 325))
+                self.__send_data('sw')
+            else:
+                self._screen.blit(south_west_arrow_unpressed, (24, 325))
+            if self._buttons_pressed == [True, False, False, True]:
+                self._screen.blit(north_east_arrow_pressed, (350, 75))
+                self.__send_data('ne')
+            else:
+                self._screen.blit(north_east_arrow_unpressed, (350, 75))
+            if self._buttons_pressed == [True, False, True, False]:
+                self._screen.blit(north_west_arrow_pressed, (24, 75))
+                self.__send_data('nw')
+            else:
+                self._screen.blit(north_west_arrow_unpressed, (24, 75))
 
             # Updates pygame display
             pygame.display.update()
