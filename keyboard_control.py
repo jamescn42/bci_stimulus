@@ -6,6 +6,7 @@
 # Imports for keyboard monitoring and display
 from pynput.keyboard import Key, Listener
 import pygame
+import serial
 
 # Exit condition events
 from pygame.locals import (
@@ -41,6 +42,8 @@ class RemoteControl:
         # Create array for button state:[<forwards>, <backwards>, <left>, <right>]
         self._buttons_pressed = [False, False, False, False]
 
+        self._last_direction = "00"
+
         # Begin pygame screen
         self._screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
@@ -50,6 +53,7 @@ class RemoteControl:
         :param key: Key Object from pynput.keyboard library
         :return: Nothing
         """
+
         if key == Key.up:
             self._buttons_pressed[0] = True
         try:
@@ -88,6 +92,7 @@ class RemoteControl:
         :param key: Key Object from pynput.keyboard library
         :return: Nothing
         """
+
         if key == Key.up:
             self._buttons_pressed[0] = False
         try:
@@ -129,6 +134,29 @@ class RemoteControl:
         running = True
         clock = pygame.time.Clock()
 
+        # import button images
+        north_arrow_unpressed = pygame.image.load("images/arrows/n_unpressed.png")
+        north_east_arrow_unpressed = pygame.image.load("images/arrows/ne_unpressed.png")
+        north_west_arrow_unpressed = pygame.image.load("images/arrows/nw_unpressed.png")
+        south_arrow_unpressed = pygame.image.load("images/arrows/s_unpressed.png")
+        south_east_arrow_unpressed = pygame.image.load("images/arrows/se_unpressed.png")
+        south_west_arrow_unpressed = pygame.image.load("images/arrows/sw_unpressed.png")
+        west_arrow_unpressed = pygame.image.load("images/arrows/w_unpressed.png")
+        east_arrow_unpressed = pygame.image.load("images/arrows/e_unpressed.png")
+
+        north_arrow_pressed = pygame.image.load("images/arrows/n_pressed.png")
+        north_east_arrow_pressed = pygame.image.load("images/arrows/ne_pressed.png")
+        north_west_arrow_pressed = pygame.image.load("images/arrows/nw_pressed.png")
+        south_arrow_pressed = pygame.image.load("images/arrows/s_pressed.png")
+        south_east_arrow_pressed = pygame.image.load("images/arrows/se_pressed.png")
+        south_west_arrow_pressed = pygame.image.load("images/arrows/sw_pressed.png")
+        west_arrow_pressed = pygame.image.load("images/arrows/w_pressed.png")
+        east_arrow_pressed = pygame.image.load("images/arrows/e_pressed.png")
+
+        # monitor the keyboard for controls
+        listener = Listener(on_press=self.__on_press, on_release=self.__on_release)
+        listener.start()
+
         # begins main loop for pygame
         while running:
             # Background color
@@ -161,34 +189,11 @@ class RemoteControl:
                 if event.type == QUIT:
                     running = False
 
-            # monitor the keyboard for controls
-            listener = Listener(on_press=self.__on_press, on_release=self.__on_release)
-            listener.start()
-
-            # import button images
-            north_arrow_unpressed = pygame.image.load("images/arrows/n_unpressed.png")
-            north_east_arrow_unpressed = pygame.image.load("images/arrows/ne_unpressed.png")
-            north_west_arrow_unpressed = pygame.image.load("images/arrows/nw_unpressed.png")
-            south_arrow_unpressed = pygame.image.load("images/arrows/s_unpressed.png")
-            south_east_arrow_unpressed = pygame.image.load("images/arrows/se_unpressed.png")
-            south_west_arrow_unpressed = pygame.image.load("images/arrows/sw_unpressed.png")
-            west_arrow_unpressed = pygame.image.load("images/arrows/w_unpressed.png")
-            east_arrow_unpressed = pygame.image.load("images/arrows/e_unpressed.png")
-
-            north_arrow_pressed = pygame.image.load("images/arrows/n_pressed.png")
-            north_east_arrow_pressed = pygame.image.load("images/arrows/ne_pressed.png")
-            north_west_arrow_pressed = pygame.image.load("images/arrows/nw_pressed.png")
-            south_arrow_pressed = pygame.image.load("images/arrows/s_pressed.png")
-            south_east_arrow_pressed = pygame.image.load("images/arrows/se_pressed.png")
-            south_west_arrow_pressed = pygame.image.load("images/arrows/sw_pressed.png")
-            west_arrow_pressed = pygame.image.load("images/arrows/w_pressed.png")
-            east_arrow_pressed = pygame.image.load("images/arrows/e_pressed.png")
-
             # Draws arrows corresponding to keyboard presses
             # And sends data to arudino though bluetooth
             if self._buttons_pressed == [True, False, False, False]:
-                self._screen.blit(north_arrow_pressed, (187, 75))
-                self.__send_data('nn')
+                self._screen.blit(north_arrow_pressed, (187, 75))  # display new image
+                self.__send_data('nn')  # send data
             else:
                 self._screen.blit(north_arrow_unpressed, (187, 75))
             if self._buttons_pressed == [False, True, False, False]:
@@ -227,6 +232,8 @@ class RemoteControl:
                 self.__send_data('nw')
             else:
                 self._screen.blit(north_west_arrow_unpressed, (24, 75))
+            if self._buttons_pressed == [False, False, False, False]:
+                self.__send_data("00")
 
             # Updates pygame display
             pygame.display.update()
@@ -234,14 +241,29 @@ class RemoteControl:
             # set FPS to 60
             clock.tick(60)
 
+        # program to stop motor!
         # exit if out of loop
         pygame.quit()
 
     def __send_data(self, direction):
         # TODO: write this function to send data to Arduino (serial or bluetooth)
-        pass
+        if self._last_direction != direction:
+            message = 'd/' + direction
+
+            ser.flush()  # clear serial stream
+
+            # clear the last message
+            clear_msg = "d/00"
+            ser.write(clear_msg.encode('utf-8'))
+
+            ser.write(message.encode('utf-8'))  # write new direction
+
+        self._last_direction = direction
 
 
 if __name__ == '__main__':
+    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    ser.flush()
+
     wheelchair = RemoteControl()
     wheelchair.begin_control()

@@ -5,11 +5,15 @@
 //setup and loops for arduino (compile last)
 
 void setup() {
+  init_motors();
+  init_ultrasonic();
   Serial.begin(9600);
 }
 
 void loop() {
-
+  
+  record_distances();
+  
   if (Serial.available() > 0) {
     //read data from serial
     String data = Serial.readStringUntil('\n');
@@ -22,7 +26,7 @@ void loop() {
 
     //add motor code
     if (data[0] == 'd') {
-      //FORMAT: 'd/f' -- drive input data: go forwards; 'f'-forwards, 'b'-back, 'l' -left, 'r'-right
+      //FORMAT: 'd/nn' -- drive input data: go north; nn, nw, ne, se,ss,sw,ee,ww
       drive_motor(data);
     }
   }
