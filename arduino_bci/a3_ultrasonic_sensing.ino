@@ -38,11 +38,11 @@ void record_distances() {
   // Promises:  Detects the distances the ultrasonic arrays are sencing, puts values into
   //            ultrasonic_distance array in cm
 
-  ultrasonic_distance[0] = sonar_pin(trig0Pin, echo0Pin);
-  ultrasonic_distance[1] = sonar_pin(trig1Pin, echo1Pin);
-  ultrasonic_distance[2] = sonar_pin(trig2Pin, echo2Pin);
-  ultrasonic_distance[3] = sonar_pin(trig3Pin, echo3Pin);
-  ultrasonic_distance[4] = sonar_pin(trig4Pin, echo4Pin);
+  ultrasonic_distance[0] = sonar_pin(trig0Pin, echo0Pin);//f
+  ultrasonic_distance[1] = sonar_pin(trig1Pin, echo1Pin);//fl
+  ultrasonic_distance[2] = sonar_pin(trig2Pin, echo2Pin);//fr
+  ultrasonic_distance[3] = sonar_pin(trig3Pin, echo3Pin);//b
+  ultrasonic_distance[4] = sonar_pin(trig4Pin, echo4Pin);//drop
 }
 
 double sonar_pin(int trig, int echo) {

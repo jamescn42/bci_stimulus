@@ -7,6 +7,7 @@
 from pynput.keyboard import Key, Listener
 import pygame
 import serial
+import time
 
 # Exit condition events
 from pygame.locals import (
@@ -234,6 +235,7 @@ class RemoteControl:
                 self._screen.blit(north_west_arrow_unpressed, (24, 75))
             if self._buttons_pressed == [False, False, False, False]:
                 self.__send_data("00")
+                pass
 
             # Updates pygame display
             pygame.display.update()
@@ -248,14 +250,14 @@ class RemoteControl:
     def __send_data(self, direction):
         # TODO: write this function to send data to Arduino (serial or bluetooth)
         if self._last_direction != direction:
-            message = 'd/' + direction
+            message = 'd/' + direction +'\n'
 
             ser.flush()  # clear serial stream
 
             # clear the last message
-            clear_msg = "d/00"
+            clear_msg = "d/00\n"
             ser.write(clear_msg.encode('utf-8'))
-
+                        
             ser.write(message.encode('utf-8'))  # write new direction
 
         self._last_direction = direction

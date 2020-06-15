@@ -17,6 +17,8 @@ void loop() {
   if (Serial.available() > 0) {
     //read data from serial
     String data = Serial.readStringUntil('\n');
+    Serial.print("data is: ");
+    Serial.println(data);
 
     //check if stimulus input
     if (data[0] == 's') {
