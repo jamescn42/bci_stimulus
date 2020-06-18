@@ -18,17 +18,17 @@ class StimulusConfig(ttk.Frame):
         self.grid(sticky=tk.N + tk.S + tk.W + tk.E)
         self.makewidgets()
 
-        # tk elements
-        self.ckbox = []
-        self.freqbox = []
-        self.phases = []
-
         # extracted data
         self.freqs = []
         self.pins = []
         self.phase_vals = []
 
     def makewidgets(self):
+        # tk elements
+        self.ckbox = []
+        self.freqbox = []
+        self.phases = []
+ 
         # title label
         ttk.Label(self, text='Set Frequencies for SSVEP',
                   font=("Verdana", 16)).grid(column=0, row=0, columnspan=4)
@@ -62,6 +62,10 @@ class StimulusConfig(ttk.Frame):
             column=0, row=19, columnspan=4)
 
     def set_freq(self):
+        
+        self.freqs = []
+        self.pins = []
+        self.phase_vals = []
 
         # extract data
         for i in range(16):
@@ -92,6 +96,7 @@ class StimulusConfig(ttk.Frame):
             message = message + \
                       f'{int(self.pins[i]):02}' + ',' + f'{self.freqs[i]:02}' + \
                       ',' + f'{int(self.phase_vals[i]):03}' + ';'
+        message = message+'\n'
 
         ser.flush()
         ser.write(message.encode('utf-8'))
