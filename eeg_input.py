@@ -53,7 +53,7 @@ from pylsl import StreamInfo, StreamOutlet, StreamInlet, resolve_streams, resolv
 
 
 class ReadEEG:
-    def __init__(self, data_dir=r'C:\Users\James\Documents\Python\summer_research\dataset-ssvep-exoskeleton'):
+    def __init__(self, data_dir=r'C:\Users\James\Documents\Python\summer_research\bci_stimulus\dataset-ssvep-exoskeleton'):
         # Get list of all subjects in the master data directory
         self.dir_list = os.listdir(data_dir)
         # Remove the files which aren't subject names
@@ -77,7 +77,7 @@ class ReadEEG:
         self._last_direction = direction
 
     def __get_subj_trial_data(self, subj_path_name,
-                              data_dir=r'C:\Users\James\Documents\Python\summer_research\dataset-ssvep-exoskeleton'):
+                              data_dir=r'C:\Users\James\Documents\Python\summer_research\bci_stimulus\dataset-ssvep-exoskeleton'):
         """
         Get the trial information from a given subject.
         This has been set-up for the public dataset of SSVEP exoskeleton data,
