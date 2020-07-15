@@ -8,6 +8,9 @@ from pynput.keyboard import Key, Listener
 import pygame
 import serial
 import time
+import tkinter as tk
+from tkinter import ttk
+import bluetooth
 
 # Exit condition events
 from pygame.locals import (
@@ -15,6 +18,28 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+
+
+class CommunicationSelection(ttk.Frame):
+    def __init__(self, parent=None):
+        super().__init__(parent, padding=5)
+        self.grid(sticky=tk.N + tk.S + tk.W + tk.E)
+        self.makewidgets()
+        self.method = False
+
+    def makewidgets(self):
+        ttk.Label(self, text='Please pick your communication method',
+                  font=("Verdana", 12)).grid(column=0, row=0, columnspan=2)
+        ttk.Button(self, text='Cable', command=self.init_serial, width=25).grid(column=0, row=1)
+        ttk.Button(self, text='Bluetooth', command=self.init_bluetooth, width=25).grid(column=1, row=1)
+
+    def init_serial(self):
+        self.method = "serial"
+        root.destroy()
+
+    def init_bluetooth(self):
+        self.method = "bluetooth"
+        root.destroy()
 
 
 class RemoteControl:
@@ -250,21 +275,32 @@ class RemoteControl:
     def __send_data(self, direction):
         # TODO: write this function to send data to Arduino (serial or bluetooth)
         if self._last_direction != direction:
-            message = 'd/' + direction +'\n'
+            message = 'd/' + direction + '\n'
 
             ser.flush()  # clear serial stream
 
             # clear the last message
             clear_msg = "d/00\n"
             ser.write(clear_msg.encode('utf-8'))
-                        
+
             ser.write(message.encode('utf-8'))  # write new direction
 
         self._last_direction = direction
 
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    # communication method selection (bluetooth or cable)
+    root = tk.Tk()
+    coms = CommunicationSelection(root)
+    root.mainloop()
+
+    if coms.method == 'serial':
+        port = '/dev/ttyACM0'
+
+    if coms.method == "bluetooth":
+        port = 'idk something???'
+
+    ser = serial.Serial(ser_port, 9600, timeout=1)
     ser.flush()
 
     wheelchair = RemoteControl()
