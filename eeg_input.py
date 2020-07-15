@@ -21,6 +21,9 @@ import os
 import glob
 import time
 
+# Communication
+import serial
+
 # MNE Specific imports
 import mne
 from mne.channels import make_standard_montage
@@ -55,6 +58,23 @@ class ReadEEG:
         self.dir_list = os.listdir(data_dir)
         # Remove the files which aren't subject names
         self.subj_list = [name for name in self.dir_list if not os.path.isfile(data_dir + '\\' + name) is True]
+
+        self._last_direction = "00"
+
+    def __send_data(self, direction):
+        # TODO: write this function to send data to Arduino ( bluetooth)
+        if self._last_direction != direction:
+            message = 'd/' + direction + '\n'
+
+            ser.flush()  # clear serial stream
+
+            # clear the last message
+            clear_msg = "d/00\n"
+            ser.write(clear_msg.encode('utf-8'))
+
+            ser.write(message.encode('utf-8'))  # write new direction
+
+        self._last_direction = direction
 
     def __get_subj_trial_data(self, subj_path_name,
                               data_dir=r'C:\Users\James\Documents\Python\summer_research\dataset-ssvep-exoskeleton'):
@@ -960,6 +980,11 @@ class ReadEEG:
                 # print(type(output_pred))
                 self.__stream_class_output(output_pred, outlet, stream_name, stream_type)
                 print("Predicted Value: " + str(pred))
+
+                direction_convert = {1: 'nn', 2: 'ww', 3: 'ss', 4: 'ee'}
+                print('Sending data: ' + direction_convert[pred])
+                self.__send_data(direction_convert[pred])
+
                 time.sleep(return_speed)
 
             # Delete the outlet
@@ -972,6 +997,8 @@ class ReadEEG:
         print("...The overall predicted accuracy is " + str(accuracy))
 
         return dict({'Predicted': predicted, 'True_Vals': true_val})
+
+
 
 
 if __name__ == '__main__':

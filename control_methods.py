@@ -6,11 +6,13 @@
 # Imports for keyboard monitoring and display
 from pynput.keyboard import Key, Listener
 import pygame
-import serial
 import time
 import tkinter as tk
 from tkinter import ttk
+
+# Communication Imports
 import bluetooth
+import serial
 
 # Exit condition events
 from pygame.locals import (
@@ -18,6 +20,9 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
+
+# import EEG Data Class
+from eeg_input import ReadEEG
 
 
 class CommunicationSelection(ttk.Frame):
@@ -30,8 +35,9 @@ class CommunicationSelection(ttk.Frame):
     def makewidgets(self):
         ttk.Label(self, text='Please pick your communication method',
                   font=("Verdana", 12)).grid(column=0, row=0, columnspan=2)
-        ttk.Button(self, text='Cable', command=self.init_serial, width=25).grid(column=0, row=1)
-        ttk.Button(self, text='Bluetooth', command=self.init_bluetooth, width=25).grid(column=1, row=1)
+        ttk.Button(self, text='Keyboard Cable', command=self.init_serial, width=25).grid(column=0, row=1)
+        ttk.Button(self, text='Keyboard Bluetooth', command=self.init_bluetooth, width=25).grid(column=1, row=1)
+        ttk.Button(self, text='EEG Sample Data', command=self.init_eeg, width=25).grid(column=0, row=2, columnspan=2)
 
     def init_serial(self):
         self.method = "serial"
@@ -39,6 +45,10 @@ class CommunicationSelection(ttk.Frame):
 
     def init_bluetooth(self):
         self.method = "bluetooth"
+        root.destroy()
+
+    def init_eeg(self):
+        self.method = "eeg_trial"
         root.destroy()
 
 
@@ -294,14 +304,22 @@ if __name__ == '__main__':
     coms = CommunicationSelection(root)
     root.mainloop()
 
-    if coms.method == 'serial':
-        port = '/dev/ttyACM0'
-
-    if coms.method == "bluetooth":
-        port = 'idk something???'
-
     ser = serial.Serial(ser_port, 9600, timeout=1)
     ser.flush()
 
-    wheelchair = RemoteControl()
-    wheelchair.begin_control()
+    if coms.method == 'serial':
+        port = '/dev/ttyACM0'
+        wheelchair = RemoteControl()
+        wheelchair.begin_control()
+
+    if coms.method == "bluetooth":
+        port = 'idk something???'
+        wheelchair = RemoteControl()
+        wheelchair.begin_control()
+
+    if coms.method == 'eeg_trial':
+        test = ReadEEG()
+        test.simulate_SSVEP_pipeline(train_subj=5, test_subj=5,
+                                     simulate_online=True,
+                                     trn_trial=0, tst_trial=1,
+                                     pipeline=2, return_speed=1)
