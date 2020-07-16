@@ -1,7 +1,7 @@
 # Author: James Chen
 # University of Calgary
 
-# import serial
+import serial
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -97,14 +97,14 @@ class StimulusConfig(ttk.Frame):
                       f'{int(self.pins[i]):02}' + ',' + f'{self.freqs[i]:02}' + \
                       ',' + f'{int(self.phase_vals[i]):03}' + ';'
         message = message + '\n'
-
-        # ser.flush()
-        # ser.write(message.encode('utf-8'))
+        ser.flush()
+        ser.write(message.encode('utf-8'))
 
 
 if __name__ == '__main__':
-    # ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-    # ser.flush()
+    ser = serial.Serial('COM8', 9600)
+    ser.flush()
+
 
     root = tk.Tk()
     StimulusConfig(root)

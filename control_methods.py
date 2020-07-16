@@ -11,7 +11,6 @@ import tkinter as tk
 from tkinter import ttk
 
 # Communication Imports
-import bluetooth
 import serial
 
 # Exit condition events
@@ -304,22 +303,30 @@ if __name__ == '__main__':
     coms = CommunicationSelection(root)
     root.mainloop()
 
-    ser = serial.Serial(ser_port, 9600, timeout=1)
-    ser.flush()
-
     if coms.method == 'serial':
         port = '/dev/ttyACM0'
+        ser = serial.Serial(port, 9600, timeout=1)
+        ser.flush()
         wheelchair = RemoteControl()
         wheelchair.begin_control()
 
     if coms.method == "bluetooth":
-        port = 'idk something???'
+        port = 'COM8'
+        ser = serial.Serial(port, 9600, timeout=1)
+        ser.flush()
         wheelchair = RemoteControl()
         wheelchair.begin_control()
 
     if coms.method == 'eeg_trial':
+        port = 'COM8'
+        ser = serial.Serial(port, 9600, timeout=1)
+        ser.flush()
+
         test = ReadEEG()
-        test.simulate_SSVEP_pipeline(train_subj=5, test_subj=5,
+        test.simulate_SSVEP_pipeline(ser, train_subj=5, test_subj=5,
                                      simulate_online=True,
                                      trn_trial=0, tst_trial=1,
                                      pipeline=2, return_speed=1)
+
+
+

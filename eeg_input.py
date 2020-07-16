@@ -61,7 +61,7 @@ class ReadEEG:
 
         self._last_direction = "00"
 
-    def __send_data(self, direction):
+    def __send_data(self, ser, direction):
         # TODO: write this function to send data to Arduino ( bluetooth)
         if self._last_direction != direction:
             message = 'd/' + direction + '\n'
@@ -863,7 +863,7 @@ class ReadEEG:
         print("...All streams finished! Ending function...")
         return sample_list, timestamp_list
 
-    def simulate_SSVEP_pipeline(self, train_subj, test_subj, simulate_online=False,
+    def simulate_SSVEP_pipeline(self, serial_stream, train_subj, test_subj, simulate_online=False,
                                 return_speed=1,
                                 trn_trial=0, tst_trial=0,
                                 run_validation=False, pipeline=1,
@@ -875,6 +875,8 @@ class ReadEEG:
 
         Parameters
         ----------
+        serial_stream : Serial Object
+            Used to externally communicate with serial devices.
         train_subj : int
             Subject number to use for training the online model, based on a list
             of subjects for analysis. Such a list MUST include the full path to
@@ -983,7 +985,7 @@ class ReadEEG:
 
                 direction_convert = {1: 'nn', 2: 'ww', 3: 'ss', 4: 'ee'}
                 print('Sending data: ' + direction_convert[pred])
-                self.__send_data(direction_convert[pred])
+                self.__send_data(serial_stream, direction_convert[pred])
 
                 time.sleep(return_speed)
 

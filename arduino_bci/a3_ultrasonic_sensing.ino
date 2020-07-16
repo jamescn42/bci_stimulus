@@ -4,6 +4,9 @@
 
 //Contains functions related to ultrasonic object/drop detection
 
+
+#if defined(ENABLE_ULTRASONIC)
+
 #define trig0Pin 22
 #define trig1Pin 24
 #define trig2Pin 26
@@ -43,6 +46,12 @@ void record_distances() {
   ultrasonic_distance[2] = sonar_pin(trig2Pin, echo2Pin);//fr
   ultrasonic_distance[3] = sonar_pin(trig3Pin, echo3Pin);//b
   ultrasonic_distance[4] = sonar_pin(trig4Pin, echo4Pin);//drop
+
+  Serial.println("***************");
+  for (int i = 0; i < 5; i++) {
+    Serial.print(i);
+    Serial.println(ultrasonic_distance[i]);
+  }
 }
 
 double sonar_pin(int trig, int echo) {
@@ -57,3 +66,5 @@ double sonar_pin(int trig, int echo) {
   long duration = pulseIn(echo, HIGH);
   return duration * 0.0343 / 2;
 }
+
+#endif
