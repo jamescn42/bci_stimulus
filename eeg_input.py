@@ -1008,4 +1008,4 @@ if __name__ == '__main__':
     test.simulate_SSVEP_pipeline(train_subj=5, test_subj=5,
                                  simulate_online=True,
                                  trn_trial=0, tst_trial=1,
-                                 pipeline=2, return_speed=0.1)
+                                 pipeline=2, return_speed=1)
