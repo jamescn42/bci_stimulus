@@ -1,7 +1,8 @@
 # Author: James Chen
 # University of Calgary
 
-"""This program will send instructions to Arduino for movement as a backup/emergency"""
+# This program will send instructions to Arduino for directional control
+# A GUI will open to select the desired control method
 
 # Imports for keyboard monitoring and display
 from pynput.keyboard import Key, Listener
@@ -25,6 +26,12 @@ from eeg_input import ReadEEG
 
 
 class CommunicationSelection(ttk.Frame):
+    """
+    Class made to run tk window to select the desired control method
+    Choices are 'Keyboard Cable', 'Keyboard Bluetooth', 'EEG Sample Data'
+    All will communicate over Serial data streams
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent, padding=5)
         self.grid(sticky=tk.N + tk.S + tk.W + tk.E)
@@ -32,6 +39,10 @@ class CommunicationSelection(ttk.Frame):
         self.method = False
 
     def makewidgets(self):
+        """
+        Makes all Tk widgets required
+        :return: None
+        """
         ttk.Label(self, text='Please pick your communication method',
                   font=("Verdana", 12)).grid(column=0, row=0, columnspan=2)
         ttk.Button(self, text='Keyboard Cable', command=self.init_serial, width=25).grid(column=0, row=1)
@@ -39,21 +50,38 @@ class CommunicationSelection(ttk.Frame):
         ttk.Button(self, text='EEG Sample Data', command=self.init_eeg, width=25).grid(column=0, row=2, columnspan=2)
 
     def init_serial(self):
+        """
+        Function used with ttk button for keyboard cable, sets control
+        method to serial and closes window
+        :return: None
+        """
         self.method = "serial"
         root.destroy()
 
     def init_bluetooth(self):
+        """
+        Function used with ttk button for bluetooth connection, sets control
+        method to bluetooth and closes window
+        :return: None
+        """
         self.method = "bluetooth"
         root.destroy()
 
     def init_eeg(self):
+        """
+        Function used with ttk button for EEG data input trial, sets control
+        method to eeg and closes window
+        :return: None
+        """
         self.method = "eeg_trial"
         root.destroy()
 
 
 class RemoteControl:
     """
-    Class used to control a Wheelchair externally
+    Class used to control a Wheelchair externally via key strokes.
+    Class will open a pygame window for wheelchair control, and will send
+    data to arduino.
 
     Attributes:
     --------------------
@@ -63,7 +91,7 @@ class RemoteControl:
     Methods:
     --------------------
     begin_control()
-        Starts pygame screen and sends corresponding information
+        Starts pygame screen and sends corresponding information via serial stream
     """
 
     def __init__(self):
@@ -85,8 +113,9 @@ class RemoteControl:
     def __on_press(self, key):
         """
         If button if pressed on keyboard, function will update button_pressed list
+
         :param key: Key Object from pynput.keyboard library
-        :return: Nothing
+        :return: None
         """
 
         if key == Key.up:
@@ -124,8 +153,9 @@ class RemoteControl:
     def __on_release(self, key):
         """
         When button is released on keyboard, function will update button_pressed list
+
         :param key: Key Object from pynput.keyboard library
-        :return: Nothing
+        :return: None
         """
 
         if key == Key.up:
@@ -162,8 +192,7 @@ class RemoteControl:
 
     def begin_control(self):
         """
-        Begins the program to send data to the bluetooth module. Starts
-        pygame screen and sends corresponding information
+        Begins pygame terminal to send data to Arduino via serial stream
         :return: Nothing
         """
         running = True
@@ -282,7 +311,13 @@ class RemoteControl:
         pygame.quit()
 
     def __send_data(self, direction):
-        # TODO: write this function to send data to Arduino (serial or bluetooth)
+        """
+        Sends received data to serial stream, either bluetooth or cable.
+
+        :param ser: Serial object connected to a specific serial port
+        :param direction: Direction/data to be sent over serial data stream
+        :return: None
+        """
         if self._last_direction != direction:
             message = 'd/' + direction + '\n'
 
@@ -303,6 +338,9 @@ if __name__ == '__main__':
     coms = CommunicationSelection(root)
     root.mainloop()
 
+    # Selection logic for setting up correct data output
+    # NOTE: Currently both bluetooth and eeg_trial communicate via the
+    # bluetooth COM port.
     if coms.method == 'serial':
         port = '/dev/ttyACM0'
         ser = serial.Serial(port, 9600, timeout=1)
@@ -327,6 +365,3 @@ if __name__ == '__main__':
                                      simulate_online=True,
                                      trn_trial=0, tst_trial=1,
                                      pipeline=2, return_speed=1)
-
-
-

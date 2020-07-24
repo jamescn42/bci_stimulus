@@ -26,12 +26,10 @@ void drive_motor(String data) {
   //Requires: valid properly formatted data sting
   //Promises: outputs PWM for drive direction, NOTE 'l' means rotate left (CCW), 'r' means rotate right(CW)
 
-  //TODO: code for output of direction of control.
-  //      dependent on type of motor controller/wheelchair output
 
   int direc = data[2] + data[3];
 
-//Code for two motor control, ie when device has one motor controling each side. 
+//Code for two motor control, ie when device has one motor controlling each side.
 #if defined(TWO_MOTOR)
   switch (direc) {
     case ('n'+'n'):

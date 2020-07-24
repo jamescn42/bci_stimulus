@@ -6,4 +6,4 @@ This code should be uploaded to an arduino nano, with H-bridge output pins (4) a
 `control_methods.py` or have a HC-06 bluetooth module attached with rx/tx pins wired to digital pins
 6 and 7.
 
-Note this is not able to run SSVEP LED's, that can be done in a seperate arduino. 
+Note this is not able to run SSVEP LED's, that can be done on a separate arduino. 

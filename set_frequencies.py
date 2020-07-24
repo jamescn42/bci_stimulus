@@ -16,14 +16,18 @@ class StimulusConfig(ttk.Frame):
     def __init__(self, parent=None):
         super().__init__(parent, padding=5)
         self.grid(sticky=tk.N + tk.S + tk.W + tk.E)
-        self.makewidgets()
+        self.__makewidgets()
 
         # extracted data
         self.freqs = []
         self.pins = []
         self.phase_vals = []
 
-    def makewidgets(self):
+    def __makewidgets(self):
+        """
+        Makes all Tk widgets required
+        :return: None
+        """
         # tk elements
         self.ckbox = []
         self.freqbox = []
@@ -58,11 +62,17 @@ class StimulusConfig(ttk.Frame):
             self.phases[i].grid(column=3, row=i + 2)
 
         # set frequencies button
-        ttk.Button(self, text='Set Frequencies', command=self.set_freq, width=15).grid(
+        ttk.Button(self, text='Set Frequencies', command=self.__set_freq, width=15).grid(
             column=0, row=19, columnspan=4)
 
-    def set_freq(self):
+    def __set_freq(self):
+        """
+        Function to be called by tk button, will extract data from tk frame
+        and send correctly formatted message bytes to arduino to set LED
+        flashing frequency
 
+        :return: None
+        """
         self.freqs = []
         self.pins = []
         self.phase_vals = []
@@ -102,9 +112,9 @@ class StimulusConfig(ttk.Frame):
 
 
 if __name__ == '__main__':
+    # setting up serial communication object, currently using COM8, bluetooth for my PC
     ser = serial.Serial('COM8', 9600)
     ser.flush()
-
 
     root = tk.Tk()
     StimulusConfig(root)

@@ -53,7 +53,8 @@ from pylsl import StreamInfo, StreamOutlet, StreamInlet, resolve_streams, resolv
 
 
 class ReadEEG:
-    def __init__(self, data_dir=r'C:\Users\James\Documents\Python\summer_research\bci_stimulus\dataset-ssvep-exoskeleton'):
+    def __init__(self,
+                 data_dir=r'C:\Users\James\Documents\Python\summer_research\bci_stimulus\dataset-ssvep-exoskeleton'):
         # Get list of all subjects in the master data directory
         self.dir_list = os.listdir(data_dir)
         # Remove the files which aren't subject names
@@ -62,7 +63,12 @@ class ReadEEG:
         self._last_direction = "00"
 
     def __send_data(self, ser, direction):
-        # TODO: write this function to send data to Arduino ( bluetooth)
+        """
+        Sends received data to serial stream, either bluetooth or cable. 
+        :param ser: Serial object connected to a specific serial port
+        :param direction: Direction/data to be sent over serial data stream
+        :return: None
+        """""
         if self._last_direction != direction:
             message = 'd/' + direction + '\n'
 
@@ -999,8 +1005,6 @@ class ReadEEG:
         print("...The overall predicted accuracy is " + str(accuracy))
 
         return dict({'Predicted': predicted, 'True_Vals': true_val})
-
-
 
 
 if __name__ == '__main__':

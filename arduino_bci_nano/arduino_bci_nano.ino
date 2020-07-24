@@ -2,7 +2,7 @@
 //University of Calgary
 //arduino_bci_nano.ino
 
-//Declaration and initalization of global variables
+//Declaration and initialization of global variables
 
 //Uncomment to activate debugging mode. Will run 299 trials of instantaneous
 //frequency for LEDs. Each trail consists of LED switching from on to off, vice versa
@@ -10,7 +10,7 @@
 
 //#define DEBUG_freq
 
-//Uncomment to activate ultrasonic sencing, note this may effect accuracy of SSVEP led
+//Uncomment to activate ultrasonic sensing, note this may effect accuracy of SSVEP led
 //frequencies
 
 //#define ENABLE_ULTRASONIC
